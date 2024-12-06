@@ -566,6 +566,7 @@ function options() {
                 show_current_settings
                 ;;
             5)
+                clear
                 return
                 ;;
             *)
@@ -632,6 +633,7 @@ function help() {
 }
 
 function main() {
+    clear
     set_language
     while true; do
         show_menu
