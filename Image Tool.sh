@@ -348,7 +348,7 @@ function create_animation() {
     fi
     display_message "Enter the output file name (e.g., output.mp4):" "請輸入輸出文件名 (如 output.mp4)：" "Ingrese el nombre del archivo de salida (por ejemplo, output.mp4):"
     read output_file
-    command="python3 video_processor.py create_animation \"$frames_dir\" \"$output_file\" \"$FRAME_RATE\""
+    command="python3 video_processor.py create_animation \"$frames_dir\" \"$output_file\""
     execute_command "$command" "Created animation $output_file from frames in $frames_dir" "Failed to create animation $output_file."
     log_action "Created animation $output_file from frames in $frames_dir"
 }
