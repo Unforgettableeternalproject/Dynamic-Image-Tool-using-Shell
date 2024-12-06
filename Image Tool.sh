@@ -288,7 +288,7 @@ function convert_image_format() {
     validate_file_path "$input_file" || return
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
-    command="python3 image_processor.py convert_format \"$input_file\" \"$output_file\""
+    command="python3 image_processor.py convert_image \"$input_file\" \"$output_file\""
     execute_command "$command" "Converted image format from $input_file to $output_file" "Failed to convert image format."
     display_message "Image format converted!" "影像格式已轉換！" "¡Formato de imagen convertido!"
     log_action "Converted image format from $input_file to $output_file"
