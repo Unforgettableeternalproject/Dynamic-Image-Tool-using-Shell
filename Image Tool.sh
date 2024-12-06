@@ -167,15 +167,18 @@ function show_menu() {
                 ;;
             n)
                 if [ $page -lt 3 ]; then
+                    clear
                     page=$((page + 1))
                 fi
                 ;;
             p)
                 if [ $page -gt 1 ]; then
+                clear
                     page=$((page - 1))
                 fi
                 ;;
             *)
+                clear
                 display_message "Invalid choice. Please try again." "無效的選擇。請再試一次。" "Opción inválida. Por favor intente de nuevo."
                 ;;
         esac
@@ -425,7 +428,7 @@ function batch_apply_filters(){
 function check_file() {
     display_message "Enter the file path to process:" "請輸入要檢查的文件路徑：" "Ingrese la ruta del archivo a procesar:"
     read file_path
-    command="python3 file_processor.py check_file \"$file_path\""
+    command="python3 image_processor.py check_file \"$file_path\""
     execute_command "$command" "Processed file $file_path for type detection" "Failed to process file $file_path."
     log_action "Processed file $file_path for type detection"
 }
