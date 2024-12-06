@@ -189,6 +189,7 @@ function validate_file_path() {
     local file_path="$1"
     if [ ! -f "$file_path" ]; then
         log_action "Error: File not found - $file_path"
+        clear
         display_message "Error: File not found. Returning to main menu." "錯誤：文件未找到。返回主菜單。" "Error: Archivo no encontrado. Volviendo al menú principal."
         return 1
     fi
@@ -199,6 +200,7 @@ function vaildate_directory() {
     local dir_path="$1"
     if [ ! -d "$dir_path" ]; then
         log_action "Error: Directory not found - $dir_path"
+        clear
         display_message "Error: Directory not found. Returning to main menu." "錯誤：目錄未找到。返回主菜單。" "Error: Directorio no encontrado. Volviendo al menú principal."
         return 1
     fi
@@ -231,7 +233,7 @@ function execute_command() {
 function split_gif_mp4() {
     display_message "Enter the path of the GIF/MP4 file:" "請輸入 GIF/MP4 文件路徑：" "Ingrese la ruta del archivo GIF/MP4:"
     read input_file
-    validate_file_path "$input_file" || execute_command "return" "Returning to main menu." "Failed to split $input_file into frames."
+    validate_file_path "$input_file" || return
     display_message "Enter the output directory for frames:" "請輸入幀輸出目錄：" "Ingrese el directorio de salida para los cuadros:"
     read output_dir
     mkdir -p "$output_dir"
@@ -243,7 +245,7 @@ function split_gif_mp4() {
 function split_sprite_sheet() {
     display_message "Enter the sprite sheet file path:" "請輸入精靈圖文件路徑：" "Ingrese la ruta del archivo de la hoja de sprites:"
     read sprite_file
-    validate_file_path "$sprite_file" || execute_command "return" "Returning to main menu." "Failed to split sprite sheet $sprite_file."
+    validate_file_path "$sprite_file" || return
     display_message "Enter the number of rows and columns (e.g., 4 4):" "請輸入行數和列數 (如 4 4)：" "Ingrese el número de filas y columnas (por ejemplo, 4 4):"
     read rows cols
     display_message "Enter the output directory for frames:" "請輸入輸出目錄：" "Ingrese el directorio de salida:"
@@ -272,7 +274,7 @@ function create_animation() {
 function apply_filters() {
     display_message "Enter the input image file:" "請輸入輸入影像文件：" "Ingrese el archivo de imagen de entrada:"
     read input_file
-    validate_file_path "$input_file" || execute_command "return" "Returning to main menu." "Failed to apply filters."
+    validate_file_path "$input_file" || return
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
     display_message "Select a filter to apply:" "選擇要應用的濾鏡：" "Seleccione un filtro para aplicar:"
@@ -293,13 +295,15 @@ function preview_animation() {
     display_message "Enter the file name of the animation to preview:" "請輸入要預覽的動畫文件名：" "Ingrese el nombre del archivo de animación para previsualizar:"
     read preview_file
     validate_file_path "$preview_file" || execute_command "return" "Returning to main menu." "Failed to preview animation $preview_file."
-    xdg-open "$preview_file"
+    command="xdg-open \"$preview_file\""
+    execute_command "$command" "Previewed animation $preview_file" "Failed to preview animation $preview_file."
+    log_action "Previewed animation $preview_file"
 }
 
 function convert_image_format() {
     display_message "Enter the input image file:" "請輸入輸入影像文件：" "Ingrese el archivo de imagen de entrada:"
     read input_file
-    validate_file_path "$input_file" || execute_command "return" "Returning to main menu." "Failed to convert image format."
+    validate_file_path "$input_file" || return
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
     command="python3 image_processor.py convert \"$input_file\" \"$output_file\""
@@ -310,7 +314,7 @@ function convert_image_format() {
 function resize_image() {
     display_message "Enter the input image file:" "請輸入輸入影像文件：" "Ingrese el archivo de imagen de entrada:"
     read input_file
-    validate_file_path "$input_file" || execute_command "return" "Returning to main menu." "Failed to resize image."
+    validate_file_path "$input_file" || return
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
     display_message "Enter the new width:" "請輸入新寬度：" "Ingrese el nuevo ancho:"
@@ -325,7 +329,7 @@ function resize_image() {
 function rotate_image() {
     display_message "Enter the input image file:" "請輸入輸入影像文件：" "Ingrese el archivo de imagen de entrada:"
     read input_file
-    validate_file_path "$input_file" || execute_command "return" "Returning to main menu." "Failed to rotate image."
+    validate_file_path "$input_file" || return
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
     display_message "Enter the rotation angle (e.g., 90, 180):" "請輸入旋轉角度 (如 90, 180)：" "Ingrese el ángulo de rotación (por ejemplo, 90, 180):"
@@ -338,7 +342,7 @@ function rotate_image() {
 function crop_image() {
     display_message "Enter the input image file:" "請輸入輸入影像文件：" "Ingrese el archivo de imagen de entrada:"
     read input_file
-    validate_file_path "$input_file" || execute_command "return" "Returning to main menu." "Failed to crop image."
+    validate_file_path "$input_file" || return
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
     display_message "Enter the width of the crop area:" "請輸入裁剪區域的寬度：" "Ingrese el ancho del área de recorte:"
@@ -357,10 +361,10 @@ function crop_image() {
 function merge_images() {
     display_message "Enter the first image file:" "請輸入第一個影像文件：" "Ingrese el primer archivo de imagen:"
     read input_file1
-    validate_file_path "$input_file1" || execute_command "return" "Returning to main menu." "Failed to merge images."
+    validate_file_path "$input_file1" || return
     display_message "Enter the second image file:" "請輸入第二個影像文件：" "Ingrese el segundo archivo de imagen:"
     read input_file2
-    validate_file_path "$input_file2" || execute_command "return" "Returning to main menu." "Failed to merge images."
+    validate_file_path "$input_file2" || return
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
     command="python3 image_processor.py merge \"$input_file1\" \"$input_file2\" \"$output_file\""
@@ -371,7 +375,7 @@ function merge_images() {
 function batch_process_images() {
     display_message "Enter the directory containing images:" "請輸入影像所在目錄：" "Ingrese el directorio que contiene las imágenes:"
     read input_dir
-    vaildate_directory "$input_dir" || execute_command "return" "Returning to main menu." "Failed to batch resize images."
+    vaildate_directory "$input_dir" || return
     display_message "Enter the output directory for resized images:" "請輸入輸出目錄：" "Ingrese el directorio de salida:"
     read output_dir
     mkdir -p "$output_dir"
