@@ -82,7 +82,7 @@ def main():
     elif operation == "batch_resize":
         batch_resize(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
     elif operation == "process_file":
-        process_file(sys.argv[2])
+        check_file(sys.argv[2])
     else:
         print(f"Unknown operation: {operation}")
         sys.exit(1)

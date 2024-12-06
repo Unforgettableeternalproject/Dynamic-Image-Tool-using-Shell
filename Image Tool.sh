@@ -288,9 +288,8 @@ function convert_image_format() {
     validate_file_path "$input_file" || return
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
-    command="python3 image_processor.py convert_image \"$input_file\" \"$output_file\""
+    command="python3 image_processor.py convert \"$input_file\" \"$output_file\""
     execute_command "$command" "Converted image format from $input_file to $output_file" "Failed to convert image format."
-    display_message "Image format converted!" "影像格式已轉換！" "¡Formato de imagen convertido!"
     log_action "Converted image format from $input_file to $output_file"
 }
 
@@ -306,7 +305,6 @@ function resize_image() {
     read height
     command="python3 image_processor.py resize \"$input_file\" \"$output_file\" \"$width\" \"$height\""
     execute_command "$command" "Resized image $input_file to ${width}x${height} and saved as $output_file" "Failed to resize image."
-    display_message "Image resized!" "影像已調整大小！" "¡Imagen redimensionada!"
     log_action "Resized image $input_file to ${width}x${height} and saved as $output_file"
 }
 
@@ -320,7 +318,6 @@ function rotate_image() {
     read angle
     command="python3 image_processor.py rotate \"$input_file\" \"$output_file\" \"$angle\""
     execute_command "$command" "Rotated image $input_file by $angle degrees and saved as $output_file" "Failed to rotate image."
-    display_message "Image rotated!" "影像已旋轉！" "¡Imagen rotada!"
     log_action "Rotated image $input_file by $angle degrees and saved as $output_file"
 }
 
@@ -340,7 +337,6 @@ function crop_image() {
     read y_offset
     command="python3 image_processor.py crop \"$input_file\" \"$output_file\" \"$width\" \"$height\" \"$x_offset\" \"$y_offset\""
     execute_command "$command" "Cropped image $input_file to ${width}x${height}+${x_offset}+${y_offset} and saved as $output_file" "Failed to crop image."
-    display_message "Image cropped!" "影像已裁剪！" "¡Imagen recortada!"
     log_action "Cropped image $input_file to ${width}x${height}+${x_offset}+${y_offset} and saved as $output_file"
 }
 
@@ -355,7 +351,6 @@ function merge_images() {
     read output_file
     command="python3 image_processor.py merge \"$input_file1\" \"$input_file2\" \"$output_file\""
     execute_command "$command" "Merged images $input_file1 and $input_file2 into $output_file" "Failed to merge images."
-    display_message "Images merged!" "影像已合併！" "¡Imágenes fusionadas!"
     log_action "Merged images $input_file1 and $input_file2 into $output_file"
 }
 
