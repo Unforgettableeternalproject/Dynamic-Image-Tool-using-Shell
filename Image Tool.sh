@@ -1,5 +1,3 @@
-#!/bin/bash
-
 LANGUAGE="EN"
 FRAME_RATE=30
 BRIGHTNESS=1.0
@@ -199,33 +197,26 @@ function execute_command() {
 
     if eval "$command"; then
         display_message "$success_message" "操作成功完成！" "¡Operación completada con éxito!"
-        # Ask user if they want to continue, if so return to main menu, else exit
-        display_message "Do you want to continue? (y/n):" "是否繼續？(y/n)：" "¿Quieres continuar? (s/n):"
-        read continue
-        if [ "$continue" != "y" ]; then
-            display_message "Exiting the program. Thank you!" "程序結束，感謝使用！" "Saliendo del programa. ¡Gracias!"
-            log_action "Program exited."
-            exit 0
-        fi
-        clear
+        log_action "$success_message"
     else
         display_message "$error_message" "操作失敗！請查看日誌文件。" "¡Operación fallida! Por favor, revise el archivo de registro."
-        echo "[$(date)] $error_message" >> "$LOG_FILE"
-        display_message "Do you want to continue? (y/n):" "是否繼續？(y/n)：" "¿Quieres continuar? (s/n):"
-        read continue
-        if [ "$continue" != "y" ]; then
-            display_message "Exiting the program. Thank you!" "程序結束，感謝使用！" "Saliendo del programa. ¡Gracias!"
-            log_action "Program exited."
-            exit 0
-        fi
-        clear
+        log_action "$error_message"
     fi
+
+    display_message "Do you want to continue? (y/n):" "是否繼續？(y/n)：" "¿Quieres continuar? (s/n):"
+    read continue
+    if [ "$continue" != "y" ]; then
+        display_message "Exiting the program. Thank you!" "程序結束，感謝使用！" "Saliendo del programa. ¡Gracias!"
+        log_action "Program exited."
+        exit 0
+    fi
+    clear
 }
 
 function split_gif_mp4() {
     display_message "Enter the path of the GIF/MP4 file:" "請輸入 GIF/MP4 文件路徑：" "Ingrese la ruta del archivo GIF/MP4:"
     read input_file
-    validate_file_path "$input_file" || return
+    validate_file_path "$input_file" || execute_command "return" "Returning to main menu." "Failed to split $input_file into frames."
     display_message "Enter the output directory for frames:" "請輸入幀輸出目錄：" "Ingrese el directorio de salida para los cuadros:"
     read output_dir
     mkdir -p "$output_dir"
@@ -237,7 +228,7 @@ function split_gif_mp4() {
 function split_sprite_sheet() {
     display_message "Enter the sprite sheet file path:" "請輸入精靈圖文件路徑：" "Ingrese la ruta del archivo de la hoja de sprites:"
     read sprite_file
-    validate_file_path "$sprite_file" || return
+    validate_file_path "$sprite_file" || execute_command "return" "Returning to main menu." "Failed to split sprite sheet $sprite_file."
     display_message "Enter the number of rows and columns (e.g., 4 4):" "請輸入行數和列數 (如 4 4)：" "Ingrese el número de filas y columnas (por ejemplo, 4 4):"
     read rows cols
     display_message "Enter the output directory for frames:" "請輸入輸出目錄：" "Ingrese el directorio de salida:"
@@ -263,29 +254,37 @@ function create_animation() {
     log_action "Created animation $output_file from frames in $frames_dir"
 }
 
-#To Be Fixed
 function apply_filters() {
-    display_message "Enter the path of the image file:" "請輸入影像文件路徑：" "Ingrese la ruta del archivo de imagen:"
+    display_message "Enter the input image file:" "請輸入輸入影像文件：" "Ingrese el archivo de imagen de entrada:"
     read input_file
-    validate_file_path "$input_file" || return
-    display_message "Enter the output file path:" "請輸入輸出文件路徑：" "Ingrese la ruta del archivo de salida:"
+    validate_file_path "$input_file" || execute_command "return" "Returning to main menu." "Failed to apply filters."
+    display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
-    command="python3 image_processor.py apply_filters \"$input_file\" \"$output_file\" \"$BRIGHTNESS\" \"$CONTRAST\""
-    execute_command "$command" "Applied filters to $input_file and saved as $output_file" "Failed to apply filters to $input_file."
-    log_action "Applied filters to $input_file and saved as $output_file"
+    display_message "Select a filter to apply:" "選擇要應用的濾鏡：" "Seleccione un filtro para aplicar:"
+    display_message "1) Grayscale" "1) 灰階" "1) Escala de grises"
+    display_message "2) Invert" "2) 反轉" "2) Invertir"
+    display_message "3) Blur" "3) 模糊" "3) Desenfocar"
+    display_message "4) Edge Enhance" "4) 邊緣增強" "4) Mejora de bordes"
+    display_message "5) Emboss" "5) 浮雕" "5) Relieve"
+    display_message "6) Smooth" "6) 平滑" "6) Suave"
+    display_message "7) Sharpen" "7) 銳化" "7) Afilado"
+    read filter_choice
+    command="python3 image_processor.py apply_filter \"$input_file\" \"$output_file\" \"$filter_choice\""
+    execute_command "$command" "Applied filter to $input_file and saved as $output_file" "Failed to apply filter to $input_file."
+    log_action "Applied filter to $input_file and saved as $output_file"
 }
 
 function preview_animation() {
     display_message "Enter the file name of the animation to preview:" "請輸入要預覽的動畫文件名：" "Ingrese el nombre del archivo de animación para previsualizar:"
     read preview_file
-    validate_file_path "$preview_file" || return
+    validate_file_path "$preview_file" || execute_command "return" "Returning to main menu." "Failed to preview animation $preview_file."
     xdg-open "$preview_file"
 }
 
 function convert_image_format() {
     display_message "Enter the input image file:" "請輸入輸入影像文件：" "Ingrese el archivo de imagen de entrada:"
     read input_file
-    validate_file_path "$input_file" || return
+    validate_file_path "$input_file" || execute_command "return" "Returning to main menu." "Failed to convert image format."
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
     command="python3 image_processor.py convert \"$input_file\" \"$output_file\""
@@ -296,7 +295,7 @@ function convert_image_format() {
 function resize_image() {
     display_message "Enter the input image file:" "請輸入輸入影像文件：" "Ingrese el archivo de imagen de entrada:"
     read input_file
-    validate_file_path "$input_file" || return
+    validate_file_path "$input_file" || execute_command "return" "Returning to main menu." "Failed to resize image."
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
     display_message "Enter the new width:" "請輸入新寬度：" "Ingrese el nuevo ancho:"
@@ -311,7 +310,7 @@ function resize_image() {
 function rotate_image() {
     display_message "Enter the input image file:" "請輸入輸入影像文件：" "Ingrese el archivo de imagen de entrada:"
     read input_file
-    validate_file_path "$input_file" || return
+    validate_file_path "$input_file" || execute_command "return" "Returning to main menu." "Failed to rotate image."
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
     display_message "Enter the rotation angle (e.g., 90, 180):" "請輸入旋轉角度 (如 90, 180)：" "Ingrese el ángulo de rotación (por ejemplo, 90, 180):"
@@ -324,7 +323,7 @@ function rotate_image() {
 function crop_image() {
     display_message "Enter the input image file:" "請輸入輸入影像文件：" "Ingrese el archivo de imagen de entrada:"
     read input_file
-    validate_file_path "$input_file" || return
+    validate_file_path "$input_file" || execute_command "return" "Returning to main menu." "Failed to crop image."
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
     display_message "Enter the width of the crop area:" "請輸入裁剪區域的寬度：" "Ingrese el ancho del área de recorte:"
@@ -343,10 +342,10 @@ function crop_image() {
 function merge_images() {
     display_message "Enter the first image file:" "請輸入第一個影像文件：" "Ingrese el primer archivo de imagen:"
     read input_file1
-    validate_file_path "$input_file1" || return
+    validate_file_path "$input_file1" || execute_command "return" "Returning to main menu." "Failed to merge images."
     display_message "Enter the second image file:" "請輸入第二個影像文件：" "Ingrese el segundo archivo de imagen:"
     read input_file2
-    validate_file_path "$input_file2" || return
+    validate_file_path "$input_file2" || execute_command "return" "Returning to main menu." "Failed to merge images."
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
     command="python3 image_processor.py merge \"$input_file1\" \"$input_file2\" \"$output_file\""
@@ -354,30 +353,72 @@ function merge_images() {
     log_action "Merged images $input_file1 and $input_file2 into $output_file"
 }
 
-function batch_resize_images() {
+function batch_process_images() {
     display_message "Enter the directory containing images:" "請輸入影像所在目錄：" "Ingrese el directorio que contiene las imágenes:"
     read input_dir
-    vaildate_directory "$input_dir" || return
+    vaildate_directory "$input_dir" || execute_command "return" "Returning to main menu." "Failed to batch resize images."
     display_message "Enter the output directory for resized images:" "請輸入輸出目錄：" "Ingrese el directorio de salida:"
     read output_dir
     mkdir -p "$output_dir"
+
+    # Process images in the input directory (Resize, Apply filters, etc.)
+    display_message "Select an operation to perform on the images:" "選擇要對影像執行的操作：" "Seleccione una operación para realizar en las imágenes:"
+    display_message "1) Batch Resize" "1) 批量調整大小" "1) Cambio de tamaño por lotes"
+    display_message "2) Batch Apply Filter" "2) 批量應用濾鏡" "2) Aplicar filtro por lotes"
+    read operation_choice
+    case $operation_choice in
+        1)
+            batch_resize_images "$input_dir" "$output_dir"
+            ;;
+        2)
+            batch_apply_filters "$input_dir" "$output_dir"
+            ;;
+        *)
+            display_message "Invalid choice. Returning to main menu." "無效的選擇。返回主菜單。" "Opción inválida. Volviendo al menú principal."
+            ;;
+    esac
+
+    log_action "Batch processed images in $input_dir and saved in $output_dir"
+}
+
+function batch_resize_images() {
+    local input_dir="$1"
+    local output_dir="$2"
     display_message "Enter the new width:" "請輸入新寬度：" "Ingrese el nuevo ancho:"
     read width
     display_message "Enter the new height:" "請輸入新高度：" "Ingrese el nuevo alto:"
     read height
     command="python3 image_processor.py batch_resize \"$input_dir\" \"$output_dir\" \"$width\" \"$height\""
-    execute_command "$command" "Batch resized images in $input_dir to ${width}x${height}, saved in $output_dir" "Failed to batch resize images."
-    log_action "Batch resized images in $input_dir to ${width}x${height}, saved in $output_dir"
+    execute_command "$command" "Batch resized images in $input_dir to ${width}x${height} and saved in $output_dir" "Failed to batch resize images."
+    log_action "Batch resized images in $input_dir to ${width}x${height} and saved in $output_dir"
+}
+
+function batch_apply_filters(){
+    local input_dir="$1"
+    local output_dir="$2"
+    display_message "Select a filter to apply:" "選擇要應用的濾鏡：" "Seleccione un filtro para aplicar:"
+    display_message "1) Grayscale" "1) 灰階" "1) Escala de grises"
+    display_message "2) Invert" "2) 反轉" "2) Invertir"
+    display_message "3) Blur" "3) 模糊" "3) Desenfocar"
+    display_message "4) Edge Enhance" "4) 邊緣增強" "4) Mejora de bordes"
+    display_message "5) Emboss" "5) 浮雕" "5) Relieve"
+    display_message "6) Smooth" "6) 平滑" "6) Suave"
+    display_message "7) Sharpen" "7) 銳化" "7) Afilado"
+    read filter_choice
+    command="python3 image_processor.py batch_apply_filter \"$input_dir\" \"$output_dir\" \"$filter_choice\""
+    execute_command "$command" "Batch applied filter to images in $input_dir, saved in $output_dir" "Failed to batch apply filter to images."
+    log_action "Batch applied filter to images in $input_dir, saved in $output_dir"
 }
 
 function check_file() {
-    display_message "Enter the file path to process:" "請輸入要處理的文件路徑：" "Ingrese la ruta del archivo a procesar:"
+    display_message "Enter the file path to process:" "請輸入要檢查的文件路徑：" "Ingrese la ruta del archivo a procesar:"
     read file_path
     command="python3 file_processor.py check_file \"$file_path\""
     execute_command "$command" "Processed file $file_path for type detection" "Failed to process file $file_path."
     log_action "Processed file $file_path for type detection"
 }
 
+#To be implemented
 function options() {
     if [ "$LANGUAGE" == "EN" ]; then
         echo "============================="
@@ -433,6 +474,61 @@ function options() {
     esac
 }
 
+function help() {
+    display_message "Enter the function ID you need help with:" "請輸入您需要幫助的功能ID：" "Ingrese el ID de la función con la que necesita ayuda:"
+    read function_id
+    case $function_id in
+        1)
+            display_message "Convert image format: Converts an image from one format to another." "轉換圖像格式：將圖像從一種格式轉換為另一種格式。" "Convertir formato de imagen: Convierte una imagen de un formato a otro."
+            ;;
+        2)
+            display_message "Resize image: Changes the dimensions of an image." "調整圖像大小：更改圖像的尺寸。" "Cambiar tamaño de imagen: Cambia las dimensiones de una imagen."
+            ;;
+        3)
+            display_message "Rotate image: Rotates an image by a specified angle." "旋轉圖像：按指定角度旋轉圖像。" "Rotar imagen: Rota una imagen por un ángulo especificado."
+            ;;
+        4)
+            display_message "Crop image: Crops a specified area from an image." "裁剪圖像：從圖像中裁剪指定區域。" "Recortar imagen: Recorta un área especificada de una imagen."
+            ;;
+        5)
+            display_message "Merge images: Merges two images into one." "合併圖像：將兩張圖像合併為一張。" "Fusionar imágenes: Fusiona dos imágenes en una."
+            ;;
+        6)
+            display_message "Split GIF/MP4 into frames: Splits a GIF or MP4 file into individual frames." "拆分 GIF/MP4 成幀：將 GIF 或 MP4 文件拆分為單獨的幀。" "Dividir GIF/MP4 en cuadros: Divide un archivo GIF o MP4 en cuadros individuales."
+            ;;
+        7)
+            display_message "Create animation (MP4/GIF): Creates an animation from a series of frames." "創建動畫 (MP4/GIF)：從一系列幀創建動畫。" "Crear animación (MP4/GIF): Crea una animación a partir de una serie de cuadros."
+            ;;
+        8)
+            display_message "Preview animation: Previews an animation from a series of frames." "預覽動畫：從一系列幀預覽動畫。" "Previsualizar animación: Previsualiza una animación a partir de una serie de cuadros."
+            ;;
+        9)
+            display_message "Batch process images: Processes multiple images in a batch." "批量處理圖像：批量處理多個圖像。" "Procesar imágenes por lotes: Procesa múltiples imágenes en un lote."
+            ;;
+        10)
+            display_message "Process file automatically: Automatically processes a file based on its type." "自動處理文件：根據文件類型自動處理文件。" "Procesar archivo automáticamente: Procesa un archivo automáticamente según su tipo."
+            ;;
+        11)
+            display_message "Options: Configures various settings for the tool." "選項：配置工具的各種設置。" "Opciones: Configura varias configuraciones para la herramienta."
+            ;;
+        12)
+            display_message "View Log: Displays the contents of the log file." "查看日誌：顯示日誌文件的內容。" "Ver registro: Muestra el contenido del archivo de registro."
+            ;;
+        13)
+            display_message "Clear Log: Clears the contents of the log file." "清除日誌：清除日誌文件的內容。" "Borrar registro: Borra el contenido del archivo de registro."
+            ;;
+        14)
+            display_message "Help: Provides information about the functions of the tool." "幫助：提供有關工具功能的信息。" "Ayuda: Proporciona información sobre las funciones de la herramienta."
+            ;;
+        15)
+            display_message "Save and Exit: Saves the current settings and exits the tool." "保存並退出：保存當前設置並退出工具。" "Guardar y salir: Guarda la configuración actual y sale de la herramienta."
+            ;;
+        *)
+            display_message "Invalid function ID. Please try again." "無效的功能ID。請再試一次。" "ID de función inválido. Por favor intente de nuevo."
+            ;;
+    esac
+}
+
 function main() {
     set_language
     while true; do
@@ -455,27 +551,39 @@ function main() {
                 merge_images
                 ;;
             6)
-                split_gif_mp4
+                apply_filters
                 ;;
             7)
-                create_animation
+                split_gif_mp4
                 ;;
             8)
-                preview_animation
+                split_sprite_sheet
                 ;;
             9)
-                batch_resize_images
+                create_animation
                 ;;
             10)
-                check_file
+                preview_animation
                 ;;
             11)
-                options
+                batch_process_images
                 ;;
             12)
-                view_log
+                check_file
                 ;;
             13)
+                options
+                ;;
+            14)
+                view_log
+                ;;
+            15)
+                clear_log
+                ;;
+            16)
+                help
+                ;;
+            17)
                 display_message "Exiting the program. Thank you!" "程序結束，感謝使用！" "Saliendo del programa. ¡Gracias!"
                 log_action "Program exited."
                 exit 0
