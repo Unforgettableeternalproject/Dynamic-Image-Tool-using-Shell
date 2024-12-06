@@ -192,6 +192,36 @@ function vaildate_directory() {
     return 0
 }
 
+function execute_command() {
+    local command="$1"
+    local success_message="$2"
+    local error_message="$3"
+
+    if eval "$command"; then
+        display_message "$success_message" "操作成功完成！" "¡Operación completada con éxito!"
+        # Ask user if they want to continue, if so return to main menu, else exit
+        display_message "Do you want to continue? (y/n):" "是否繼續？(y/n)：" "¿Quieres continuar? (s/n):"
+        read continue
+        if [ "$continue" != "y" ]; then
+            display_message "Exiting the program. Thank you!" "程序結束，感謝使用！" "Saliendo del programa. ¡Gracias!"
+            log_action "Program exited."
+            exit 0
+        fi
+        clear
+    else
+        display_message "$error_message" "操作失敗！請查看日誌文件。" "¡Operación fallida! Por favor, revise el archivo de registro."
+        echo "[$(date)] $error_message" >> "$LOG_FILE"
+        display_message "Do you want to continue? (y/n):" "是否繼續？(y/n)：" "¿Quieres continuar? (s/n):"
+        read continue
+        if [ "$continue" != "y" ]; then
+            display_message "Exiting the program. Thank you!" "程序結束，感謝使用！" "Saliendo del programa. ¡Gracias!"
+            log_action "Program exited."
+            exit 0
+        fi
+        clear
+    fi
+}
+
 function split_gif_mp4() {
     display_message "Enter the path of the GIF/MP4 file:" "請輸入 GIF/MP4 文件路徑：" "Ingrese la ruta del archivo GIF/MP4:"
     read input_file
@@ -199,7 +229,8 @@ function split_gif_mp4() {
     display_message "Enter the output directory for frames:" "請輸入幀輸出目錄：" "Ingrese el directorio de salida para los cuadros:"
     read output_dir
     mkdir -p "$output_dir"
-    python3 video_processor.py split_gif_mp4 "$input_file" "$output_dir"
+    command="python3 video_processor.py split_gif_mp4 \"$input_file\" \"$output_dir\""
+    execute_command "$command" "Split $input_file into frames in $output_dir" "Failed to split $input_file into frames."
     log_action "Split $input_file into frames in $output_dir"
 }
 
@@ -212,7 +243,8 @@ function split_sprite_sheet() {
     display_message "Enter the output directory for frames:" "請輸入輸出目錄：" "Ingrese el directorio de salida:"
     read output_dir
     mkdir -p "$output_dir"
-    python3 video_processor.py split_sprite_sheet "$sprite_file" "$rows" "$cols" "$output_dir"
+    command="python3 video_processor.py split_sprite_sheet \"$sprite_file\" \"$rows\" \"$cols\" \"$output_dir\""
+    execute_command "$command" "Split sprite sheet $sprite_file into $rows x $cols frames in $output_dir" "Failed to split sprite sheet $sprite_file."
     log_action "Split sprite sheet $sprite_file into $rows x $cols frames in $output_dir"
 }
 
@@ -226,17 +258,20 @@ function create_animation() {
     fi
     display_message "Enter the output file name (e.g., output.mp4):" "請輸入輸出文件名 (如 output.mp4)：" "Ingrese el nombre del archivo de salida (por ejemplo, output.mp4):"
     read output_file
-    python3 video_processor.py create_animation "$frames_dir" "$output_file" "$FRAME_RATE"
+    command="python3 video_processor.py create_animation \"$frames_dir\" \"$output_file\" \"$FRAME_RATE\""
+    execute_command "$command" "Created animation $output_file from frames in $frames_dir" "Failed to create animation $output_file."
     log_action "Created animation $output_file from frames in $frames_dir"
 }
 
+#To Be Fixed
 function apply_filters() {
     display_message "Enter the path of the image file:" "請輸入影像文件路徑：" "Ingrese la ruta del archivo de imagen:"
     read input_file
     validate_file_path "$input_file" || return
     display_message "Enter the output file path:" "請輸入輸出文件路徑：" "Ingrese la ruta del archivo de salida:"
     read output_file
-    python3 image_processor.py apply_filters "$input_file" "$output_file" "$BRIGHTNESS" "$CONTRAST"
+    command="python3 image_processor.py apply_filters \"$input_file\" \"$output_file\" \"$BRIGHTNESS\" \"$CONTRAST\""
+    execute_command "$command" "Applied filters to $input_file and saved as $output_file" "Failed to apply filters to $input_file."
     log_action "Applied filters to $input_file and saved as $output_file"
 }
 
@@ -253,7 +288,8 @@ function convert_image_format() {
     validate_file_path "$input_file" || return
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
-    python3 image_processor.py convert "$input_file" "$output_file"
+    command="python3 image_processor.py convert_format \"$input_file\" \"$output_file\""
+    execute_command "$command" "Converted image format from $input_file to $output_file" "Failed to convert image format."
     display_message "Image format converted!" "影像格式已轉換！" "¡Formato de imagen convertido!"
     log_action "Converted image format from $input_file to $output_file"
 }
@@ -268,7 +304,8 @@ function resize_image() {
     read width
     display_message "Enter the new height:" "請輸入新高度：" "Ingrese el nuevo alto:"
     read height
-    python3 image_processor.py resize "$input_file" "$output_file" "$width" "$height"
+    command="python3 image_processor.py resize \"$input_file\" \"$output_file\" \"$width\" \"$height\""
+    execute_command "$command" "Resized image $input_file to ${width}x${height} and saved as $output_file" "Failed to resize image."
     display_message "Image resized!" "影像已調整大小！" "¡Imagen redimensionada!"
     log_action "Resized image $input_file to ${width}x${height} and saved as $output_file"
 }
@@ -281,7 +318,8 @@ function rotate_image() {
     read output_file
     display_message "Enter the rotation angle (e.g., 90, 180):" "請輸入旋轉角度 (如 90, 180)：" "Ingrese el ángulo de rotación (por ejemplo, 90, 180):"
     read angle
-    python3 image_processor.py rotate "$input_file" "$output_file" "$angle"
+    command="python3 image_processor.py rotate \"$input_file\" \"$output_file\" \"$angle\""
+    execute_command "$command" "Rotated image $input_file by $angle degrees and saved as $output_file" "Failed to rotate image."
     display_message "Image rotated!" "影像已旋轉！" "¡Imagen rotada!"
     log_action "Rotated image $input_file by $angle degrees and saved as $output_file"
 }
@@ -300,7 +338,8 @@ function crop_image() {
     read x_offset
     display_message "Enter the y offset of the crop area:" "請輸入裁剪區域的 y 偏移量：" "Ingrese el desplazamiento y del área de recorte:"
     read y_offset
-    python3 image_processor.py crop "$input_file" "$output_file" "$x" "$y" "$width" "$height"
+    command="python3 image_processor.py crop \"$input_file\" \"$output_file\" \"$width\" \"$height\" \"$x_offset\" \"$y_offset\""
+    execute_command "$command" "Cropped image $input_file to ${width}x${height}+${x_offset}+${y_offset} and saved as $output_file" "Failed to crop image."
     display_message "Image cropped!" "影像已裁剪！" "¡Imagen recortada!"
     log_action "Cropped image $input_file to ${width}x${height}+${x_offset}+${y_offset} and saved as $output_file"
 }
@@ -314,7 +353,8 @@ function merge_images() {
     validate_file_path "$input_file2" || return
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
-    python3 image_processor.py merge "$input_file1" "$input_file2" "$output_file"
+    command="python3 image_processor.py merge \"$input_file1\" \"$input_file2\" \"$output_file\""
+    execute_command "$command" "Merged images $input_file1 and $input_file2 into $output_file" "Failed to merge images."
     display_message "Images merged!" "影像已合併！" "¡Imágenes fusionadas!"
     log_action "Merged images $input_file1 and $input_file2 into $output_file"
 }
@@ -330,65 +370,17 @@ function batch_resize_images() {
     read width
     display_message "Enter the new height:" "請輸入新高度：" "Ingrese el nuevo alto:"
     read height
-    python3 image_processor.py batch_resize "$input_dir" "$output_dir" "$width" "$height"
+    command="python3 image_processor.py batch_resize \"$input_dir\" \"$output_dir\" \"$width\" \"$height\""
+    execute_command "$command" "Batch resized images in $input_dir to ${width}x${height}, saved in $output_dir" "Failed to batch resize images."
     log_action "Batch resized images in $input_dir to ${width}x${height}, saved in $output_dir"
 }
 
 function check_file() {
     display_message "Enter the file path to process:" "請輸入要處理的文件路徑：" "Ingrese la ruta del archivo a procesar:"
     read file_path
-    python3 image_processor.py process_file "$file_path"
+    command="python3 file_processor.py check_file \"$file_path\""
+    execute_command "$command" "Processed file $file_path for type detection" "Failed to process file $file_path."
     log_action "Processed file $file_path for type detection"
-}
-
-function install_mpv() {
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        sudo apt-get update
-        sudo apt-get install -y mpv
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        brew install mpv
-    elif [[ "$OSTYPE" == "cygwin" ]]; then
-        echo "Please install mpv manually for Cygwin."
-    elif [[ "$OSTYPE" == "msys" ]]; then
-        echo "Please install mpv manually for MSYS."
-    elif [[ "$OSTYPE" == "win32" ]]; then
-        echo "Please install mpv manually for Windows."
-    else
-        echo "Unsupported OS. Please install mpv manually."
-    fi
-}
-
-function play_bad_apple() {
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-
-    echo
-    read -p "Do you want to use mpv to play sound? You need mpv installed to do that. (y/n): " choice
-    if [[ $choice =~ ^[Yy]$ ]]; then
-        # Check if mpv is installed
-        if ! command -v mpv &> /dev/null; then
-            echo
-            echo "mpv is not installed. Installing mpv..."
-            install_mpv
-            if ! command -v mpv &> /dev/null; then
-                echo "Failed to install mpv. Please install it manually."
-                exit 1
-            fi
-        fi
-        mpv --no-video "$SCRIPT_DIR/bad_apple.mp4" > /dev/null 2>&1 &
-    fi
-
-    dir="$SCRIPT_DIR/frames-ascii"
-
-    clear
-
-    for filename in $(ls -v "$dir"); do
-        tput cup 0 0
-        file="$dir/$filename"
-        if [ -f "$file" ]; then
-            cat "$file"
-        fi
-        sleep 0.024
-    done
 }
 
 function options() {
@@ -492,9 +484,6 @@ function main() {
                 display_message "Exiting the program. Thank you!" "程序結束，感謝使用！" "Saliendo del programa. ¡Gracias!"
                 log_action "Program exited."
                 exit 0
-                ;;
-            ?)
-                play_bad_apple
                 ;;
             *)
                 display_message "Invalid choice. Please try again." "無效的選擇。請再試一次。" "Opción inválida. Por favor intente de nuevo."

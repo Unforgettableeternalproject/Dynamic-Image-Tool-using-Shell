@@ -4,8 +4,19 @@ from PIL import Image
 
 def convert_image(input_file, output_file):
     img = Image.open(input_file)
-    img.save(output_file)
-    print(f"Converted {input_file} to {output_file}")
+
+    if img.mode in ("RGBA", "LA"):
+        background = Image.new("RGB", img.size, (255, 255, 255))
+        background.paste(img, mask=img.split()[3])
+        img = background
+
+    output_format = output_file.split(".")[-1].upper()
+
+    try:
+        img.save(output_file, format=output_format, quality=95, optimize=True)
+        print(f"Converted {input_file} to {output_file}")
+    except Exception as e:
+        print(f"Failed to convert {input_file} to {output_file}: {e}")
 
 def resize_image(input_file, output_file, width, height):
     img = Image.open(input_file)
@@ -44,7 +55,7 @@ def batch_resize(input_dir, output_dir, width, height):
         except Exception as e:
             print(f"Failed to resize {input_file}: {e}")
 
-def process_file(file_path):
+def check_file(file_path):
     if file_path.endswith((".gif", ".mp4")):
         print(f"{file_path} is a video or animation. You can use the split operation.")
     elif file_path.endswith((".png", ".jpg", ".jpeg")):
