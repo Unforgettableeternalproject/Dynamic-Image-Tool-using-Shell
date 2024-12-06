@@ -253,7 +253,7 @@ function convert_image_format() {
     validate_file_path "$input_file" || return
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
-    convert "$input_file" "$output_file"
+    python3 image_processor.py convert "$input_file" "$output_file"
     display_message "Image format converted!" "影像格式已轉換！" "¡Formato de imagen convertido!"
     log_action "Converted image format from $input_file to $output_file"
 }
@@ -268,7 +268,7 @@ function resize_image() {
     read width
     display_message "Enter the new height:" "請輸入新高度：" "Ingrese el nuevo alto:"
     read height
-    convert "$input_file" -resize "${width}x${height}" "$output_file"
+    python3 image_processor.py resize "$input_file" "$output_file" "$width" "$height"
     display_message "Image resized!" "影像已調整大小！" "¡Imagen redimensionada!"
     log_action "Resized image $input_file to ${width}x${height} and saved as $output_file"
 }
@@ -281,7 +281,7 @@ function rotate_image() {
     read output_file
     display_message "Enter the rotation angle (e.g., 90, 180):" "請輸入旋轉角度 (如 90, 180)：" "Ingrese el ángulo de rotación (por ejemplo, 90, 180):"
     read angle
-    convert "$input_file" -rotate "$angle" "$output_file"
+    python3 image_processor.py rotate "$input_file" "$output_file" "$angle"
     display_message "Image rotated!" "影像已旋轉！" "¡Imagen rotada!"
     log_action "Rotated image $input_file by $angle degrees and saved as $output_file"
 }
@@ -300,7 +300,7 @@ function crop_image() {
     read x_offset
     display_message "Enter the y offset of the crop area:" "請輸入裁剪區域的 y 偏移量：" "Ingrese el desplazamiento y del área de recorte:"
     read y_offset
-    convert "$input_file" -crop "${width}x${height}+${x_offset}+${y_offset}" "$output_file"
+    python3 image_processor.py crop "$input_file" "$output_file" "$x" "$y" "$width" "$height"
     display_message "Image cropped!" "影像已裁剪！" "¡Imagen recortada!"
     log_action "Cropped image $input_file to ${width}x${height}+${x_offset}+${y_offset} and saved as $output_file"
 }
@@ -314,7 +314,7 @@ function merge_images() {
     validate_file_path "$input_file2" || return
     display_message "Enter the output image file:" "請輸入輸出影像文件：" "Ingrese el archivo de imagen de salida:"
     read output_file
-    convert "$input_file1" "$input_file2" +append "$output_file"
+    python3 image_processor.py merge "$input_file1" "$input_file2" "$output_file"
     display_message "Images merged!" "影像已合併！" "¡Imágenes fusionadas!"
     log_action "Merged images $input_file1 and $input_file2 into $output_file"
 }
