@@ -30,7 +30,7 @@ def split_sprite_sheet(input_file, rows, cols, output_dir):
         print(f"Failed to split sprite sheet {input_file}: {e}")
         sys.exit(1)
 
-def create_animation(input_dir, output_file, frame_rate):
+def create_animation(input_dir, output_file, frame_rate=5):
     try:
         command = ["ffmpeg", "-framerate", str(frame_rate), "-i",
                 f"{input_dir}/frame_%04d.png", "-c:v", "libx264", "-pix_fmt", "yuv420p", output_file]
