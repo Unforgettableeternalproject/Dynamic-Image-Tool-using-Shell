@@ -376,7 +376,7 @@ function apply_filters() {
 function preview_animation() {
     display_message "Enter the file name of the animation to preview:" "請輸入要預覽的動畫文件名：" "Ingrese el nombre del archivo de animación para previsualizar:"
     read preview_file
-    validate_file_path "$preview_file" || execute_command "return" "Returning to main menu." "Failed to preview animation $preview_file."
+    validate_file_path "$preview_file" || return
     command="xdg-open \"$preview_file\""
     execute_command "$command" "Previewed animation $preview_file" "Failed to preview animation $preview_file."
     log_action "Previewed animation $preview_file"
@@ -475,6 +475,7 @@ function batch_process_images() {
             batch_apply_filters "$input_dir" "$output_dir"
             ;;
         *)
+            clear
             display_message "Invalid choice. Returning to main menu." "無效的選擇。返回主菜單。" "Opción inválida. Volviendo al menú principal."
             ;;
     esac
@@ -630,11 +631,21 @@ function help() {
             display_message "Invalid function ID. Please try again." "無效的功能ID。請再試一次。" "ID de función inválido. Por favor intente de nuevo."
             ;;
     esac
+
+    display_message "Do you want to continue? (y/n):" "是否繼續？(y/n)：" "¿Quieres continuar? (s/n):"
+    read continue
+    if [ "$continue" != "y" ]; then
+        display_message "Exiting the program. Thank you!" "程序結束，感謝使用！" "Saliendo del programa. ¡Gracias!"
+        log_action "Program exited."
+        exit 0
+    fi
+    clear
 }
 
 function main() {
     clear
     set_language
+    clear
     while true; do
         show_menu
         choice=$?

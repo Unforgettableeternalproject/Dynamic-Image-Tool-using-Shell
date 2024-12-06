@@ -146,6 +146,7 @@ def check_file(file_path):
 
     else:
         print(f"Unsupported file type for {file_path}.")
+        sys.exit(1)
 
 def main():
     if len(sys.argv) < 2:
