@@ -1,7 +1,4 @@
 LANGUAGE="EN"
-FRAME_RATE=30
-BRIGHTNESS=1.0
-CONTRAST=1.0
 
 LOG_FILE="program.log"
 
@@ -19,12 +16,30 @@ function view_log() {
         display_message "Log file does not exist. Creating a new log file." "日誌文件不存在。正在創建新日誌文件。" "El archivo de registro no existe. Creando un nuevo archivo de registro."
         touch "$LOG_FILE"
     fi
+
+    display_message "Do you want to continue? (y/n):" "是否繼續？(y/n)：" "¿Quieres continuar? (s/n):"
+    read continue
+    if [ "$continue" != "y" ]; then
+        display_message "Exiting the program. Thank you!" "程序結束，感謝使用！" "Saliendo del programa. ¡Gracias!"
+        log_action "Program exited."
+        exit 0
+    fi
+    clear
 }
 
 function clear_log() {
     display_message "Clearing log file contents..." "清除日誌文件內容..." "Borrando el contenido del archivo de registro..."
     > "$LOG_FILE"
     display_message "Log file cleared." "日誌文件已清除。" "Archivo de registro borrado."
+
+    display_message "Do you want to continue? (y/n):" "是否繼續？(y/n)：" "¿Quieres continuar? (s/n):"
+    read continue
+    if [ "$continue" != "y" ]; then
+        display_message "Exiting the program. Thank you!" "程序結束，感謝使用！" "Saliendo del programa. ¡Gracias!"
+        log_action "Program exited."
+        exit 0
+    fi
+    clear
 }
 
 function set_language() {
@@ -43,6 +58,59 @@ function set_language() {
         3) LANGUAGE="ES" ;;
         *) echo "Invalid choice. Defaulting to English."; LANGUAGE="EN" ;;
     esac
+}
+
+function change_terminal_colors() {
+    echo "Select a color scheme:"
+    echo "1) Default (White text on black background)"
+    echo "2) Solarized (Bright colors)"
+    echo "3) Monokai (Subtle dark)"
+    echo "4) Custom (Enter your own colors)"
+    read color_choice
+    case $color_choice in
+        1)
+            echo -e "\033[0m"  # 重置為默認
+            ;;
+        2)
+            echo -e "\033[38;5;230m\033[48;5;235m"  # Solarized
+            ;;
+        3)
+            echo -e "\033[38;5;223m\033[48;5;233m"  # Monokai
+            ;;
+        4)
+            echo "Enter text color (0-255):"
+            read text_color
+            echo "Enter background color (0-255):"
+            read bg_color
+            echo -e "\033[38;5;${text_color}m\033[48;5;${bg_color}m"
+            ;;
+        *)
+            display_message "Invalid choice. No changes made." "無效的選擇。未進行更改。" "Opción inválida. No se realizaron cambios."
+            ;;
+    esac
+    display_message "Terminal colors updated!" "終端機顏色已更新！" "¡Colores del terminal actualizados!"
+}
+
+function resize_terminal() {
+    echo "Enter the number of rows (height):"
+    read rows
+    echo "Enter the number of columns (width):"
+    read cols
+    if command -v resize &> /dev/null; then
+        resize -s "$rows" "$cols"
+    else
+        echo -e "\033[8;${rows};${cols}t"
+    fi
+    display_message "Terminal size updated to ${rows}x${cols}!" "終端機大小已調整為 ${rows}x${cols}！" "¡Tamaño del terminal actualizado a ${rows}x${cols}!"
+}
+
+function show_current_settings() {
+    echo "============================="
+    display_message "Current Settings:" "當前設置：" "Configuraciones actuales:"
+    echo "============================="
+    echo "Language: $LANGUAGE"
+    echo "============================="
+    read -p "Press Enter to return to the options menu..."
 }
 
 function display_message() {
@@ -437,61 +505,62 @@ function check_file() {
     log_action "Processed file $file_path for type detection"
 }
 
-#To be implemented
 function options() {
-    if [ "$LANGUAGE" == "EN" ]; then
-        echo "============================="
-        echo " Options"
-        echo "============================="
-        echo "1) Change Language"
-        echo "2) Set Frame Rate"
-        echo "3) Set Brightness"
-        echo "4) Set Contrast"
-        echo "5) Back to Main Menu"
-    elif [ "$LANGUAGE" == "ZH" ]; then
-        echo "============================="
-        echo " 選項"
-        echo "============================="
-        echo "1) 更改語言"
-        echo "2) 設定幀率"
-        echo "3) 設定亮度"
-        echo "4) 設定對比度"
-        echo "5) 返回主菜單"
-    elif [ "$LANGUAGE" == "ES" ]; then
-        echo "============================="
-        echo " Opciones"
-        echo "============================="
-        echo "1) Cambiar idioma"
-        echo "2) Establecer tasa de cuadros"
-        echo "3) Establecer brillo"
-        echo "4) Establecer contraste"
-        echo "5) Volver al menú principal"
-    fi
-    read opt_choice
-    case $opt_choice in
-        1)
-            set_language
-            ;;
-        2)
-            display_message "Enter the frame rate:" "請輸入幀率：" "Ingrese la tasa de cuadros:"
-            read FRAME_RATE
-            ;;
-        3)
-            display_message "Enter the brightness adjustment value (default 1.0):" "請輸入亮度調整值 (默認 1.0)：" "Ingrese el valor de ajuste de brillo (predeterminado 1.0):"
-            read BRIGHTNESS
-            ;;
-        4)
-            display_message "Enter the contrast adjustment value (default 1.0):" "請輸入對比度調整值 (默認 1.0)：" "Ingrese el valor de ajuste de contraste (predeterminado 1.0):"
-            read CONTRAST
-            ;;
-        5)
-            return
-            ;;
-        *)
-            display_message "Invalid choice. Returning to main menu." "無效的選擇。返回主菜單。" "Opción inválida. Volviendo al menú principal."
-            ;;
-    esac
+    while true; do
+        clear
+        if [ "$LANGUAGE" == "EN" ]; then
+            echo "============================="
+            echo " Options"
+            echo "============================="
+            echo "1) Change Language"
+            echo "2) Change Terminal Colors"
+            echo "3) Resize Terminal"
+            echo "4) Show Current Settings"
+            echo "5) Back to Main Menu"
+        elif [ "$LANGUAGE" == "ZH" ]; then
+            echo "============================="
+            echo " 選項"
+            echo "============================="
+            echo "1) 更改語言"
+            echo "2) 更改終端機顏色"
+            echo "3) 調整終端機大小"
+            echo "4) 顯示當前設置"
+            echo "5) 返回主菜單"
+        elif [ "$LANGUAGE" == "ES" ]; then
+            echo "============================="
+            echo " Opciones"
+            echo "============================="
+            echo "1) Cambiar idioma"
+            echo "2) Cambiar colores del terminal"
+            echo "3) Cambiar tamaño del terminal"
+            echo "4) Mostrar configuraciones actuales"
+            echo "5) Volver al menú principal"
+        fi
+        
+        read -p "Select an option: " opt_choice
+        case $opt_choice in
+            1)
+                set_language
+                ;;
+            2)
+                change_terminal_colors
+                ;;
+            3)
+                resize_terminal
+                ;;
+            4)
+                show_current_settings
+                ;;
+            5)
+                return
+                ;;
+            *)
+                display_message "Invalid choice. Please try again." "無效的選擇。請再試一次。" "Opción inválida. Por favor intente de nuevo."
+                ;;
+        esac
+    done
 }
+
 
 function help() {
     display_message "Enter the function ID you need help with:" "請輸入您需要幫助的功能ID：" "Ingrese el ID de la función con la que necesita ayuda:"

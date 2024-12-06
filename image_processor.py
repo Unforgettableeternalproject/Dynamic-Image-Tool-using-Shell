@@ -180,6 +180,9 @@ def main():
     elif operation == "batch_apply_filter":
         batch_apply_filter(sys.argv[2], sys.argv[3], sys.argv[4])
 
+    elif operation == "check_file":
+        check_file(sys.argv[2])
+
     else:
         print(f"Unknown operation: {operation}")
         sys.exit(1)
