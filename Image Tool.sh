@@ -1,4 +1,6 @@
 LANGUAGE="EN"
+THEME="Default"
+SIZE="80x24"
 
 LOG_FILE="program.log"
 
@@ -58,6 +60,8 @@ function set_language() {
         3) LANGUAGE="ES" ;;
         *) echo "Invalid choice. Defaulting to English."; LANGUAGE="EN" ;;
     esac
+    display_message "Language updated!" "語言已更新！" "¡Idioma actualizado!"
+    log_action "Language updated to $LANGUAGE"
 }
 
 function change_terminal_colors() {
@@ -70,12 +74,15 @@ function change_terminal_colors() {
     case $color_choice in
         1)
             echo -e "\033[0m"  # 重置為默認
+            THEME="Default"
             ;;
         2)
             echo -e "\033[38;5;230m\033[48;5;235m"  # Solarized
+            THEME="Solarized"
             ;;
         3)
             echo -e "\033[38;5;223m\033[48;5;233m"  # Monokai
+            THEME="Monokai"
             ;;
         4)
             echo "Enter text color (0-255):"
@@ -83,12 +90,14 @@ function change_terminal_colors() {
             echo "Enter background color (0-255):"
             read bg_color
             echo -e "\033[38;5;${text_color}m\033[48;5;${bg_color}m"
+            THEME="Custom"
             ;;
         *)
             display_message "Invalid choice. No changes made." "無效的選擇。未進行更改。" "Opción inválida. No se realizaron cambios."
             ;;
     esac
     display_message "Terminal colors updated!" "終端機顏色已更新！" "¡Colores del terminal actualizados!"
+    log_action "Terminal colors updated to $THEME"
 }
 
 function resize_terminal() {
@@ -101,14 +110,19 @@ function resize_terminal() {
     else
         echo -e "\033[8;${rows};${cols}t"
     fi
+    SIZE="${rows}x${cols}"
     display_message "Terminal size updated to ${rows}x${cols}!" "終端機大小已調整為 ${rows}x${cols}！" "¡Tamaño del terminal actualizado a ${rows}x${cols}!"
+    log_action "Terminal size updated to ${rows}x${cols}"
 }
 
 function show_current_settings() {
     echo "============================="
     display_message "Current Settings:" "當前設置：" "Configuraciones actuales:"
     echo "============================="
-    echo "Language: $LANGUAGE"
+    display_message "Language: $LANGUAGE" "語言：$LANGUAGE" "Idioma: $LANGUAGE"
+    display_message "Terminal Theme: $THEME" "終端機主題：$THEME" "Tema del terminal: $THEME"
+    display_message "Terminal Size: $SIZE" "終端機大小：$SIZE" "Tamaño del terminal: $SIZE"
+    display_message "Current Time: $(date)" "當前時間：$(date)" "Hora actual: $(date)"
     echo "============================="
     read -p "Press Enter to return to the options menu..."
 }
