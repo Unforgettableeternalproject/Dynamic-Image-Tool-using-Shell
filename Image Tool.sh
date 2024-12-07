@@ -65,11 +65,12 @@ function set_language() {
 }
 
 function change_terminal_colors() {
-    echo "Select a color scheme:"
-    echo "1) Default (White text on black background)"
-    echo "2) Solarized (Bright colors)"
-    echo "3) Monokai (Subtle dark)"
-    echo "4) Custom (Enter your own colors)"
+    display_message "Select a terminal color theme:" "選擇終端機顏色主題：" "Seleccione un tema de color de terminal:"
+    display_message "1) Default" "1) 默認" "1) Predeterminado"
+    display_message "2) Solarized" "2) Solarized" "2) Solarizado"
+    display_message "3) Monokai" "3) Monokai" "3) Monokai"
+    display_message "4) Custom" "4) 自定義" "4) Personalizado"
+
     read color_choice
     case $color_choice in
         1)
@@ -85,9 +86,9 @@ function change_terminal_colors() {
             THEME="Monokai"
             ;;
         4)
-            echo "Enter text color (0-255):"
+            display_message "Enter text color (0-255):" "輸入文本顏色 (0-255)：" "Ingrese el color del texto (0-255):"
             read text_color
-            echo "Enter background color (0-255):"
+            display_message "Enter background color (0-255):" "輸入背景顏色 (0-255)：" "Ingrese el color de fondo (0-255):"
             read bg_color
             echo -e "\033[38;5;${text_color}m\033[48;5;${bg_color}m"
             THEME="Custom"
@@ -101,9 +102,9 @@ function change_terminal_colors() {
 }
 
 function resize_terminal() {
-    echo "Enter the number of rows (height):"
+    display_message "Enter the number of rows (height):" "請輸入行數 (高度)：" "Ingrese el número de filas (alto):"
     read rows
-    echo "Enter the number of columns (width):"
+    display_message "Enter the number of columns (width):" "請輸入列數 (寬度)：" "Ingrese el número de columnas (ancho):"
     read cols
     if command -v resize &> /dev/null; then
         resize -s "$rows" "$cols"
