@@ -553,7 +553,8 @@ function options() {
             echo "5) Volver al menú principal"
         fi
         
-        read -p "Select an option: " opt_choice
+        display_message "Select an option:" "選擇一個選項：" "Seleccione una opción:"
+        read opt_choice
         case $opt_choice in
             1)
                 set_language
