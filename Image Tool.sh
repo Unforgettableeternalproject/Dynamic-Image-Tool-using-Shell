@@ -7,17 +7,17 @@ LOG_FILE="program.log"
 function log_action() {
     local action_message="$1"
     local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
-    echo "[$timestamp] $action_message" >> "$LOG_FILE"
-}
-
-function view_log() {
-    display_message "Displaying log file contents:" "顯示日誌文件內容：" "Mostrando el contenido del archivo de registro:"
     if [ -f "$LOG_FILE" ]; then
         cat "$LOG_FILE"
     else
         display_message "Log file does not exist. Creating a new log file." "日誌文件不存在。正在創建新日誌文件。" "El archivo de registro no existe. Creando un nuevo archivo de registro."
         touch "$LOG_FILE"
     fi
+    echo "[$timestamp] $action_message" >> "$LOG_FILE"
+}
+
+function view_log() {
+    display_message "Displaying log file contents:" "顯示日誌文件內容：" "Mostrando el contenido del archivo de registro:"
 
     display_message "Do you want to continue? (y/n):" "是否繼續？(y/n)：" "¿Quieres continuar? (s/n):"
     read continue
@@ -162,7 +162,7 @@ function show_menu_page() {
             echo "  10) Preview animation"
             echo "11-12) Others:"
             echo "  11) Batch process images"
-            echo " 12) Check file vaildity"
+            echo "  12) Check file vaildity"
         elif [ "$page" == "3" ]; then
             echo "13-17) System Options:"
             echo " 13) Options"
